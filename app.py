@@ -1,45 +1,55 @@
 from flask import Flask, render_template
-import os, requests, random
+import requests
+import random
+
 app = Flask(__name__)
 
-API_TOKEN =  \
-    "JiwPumUVzR09r0Amrig4U14cGcYdoiNVcGTtncZUwYMNTt0SuEVmeuOV7kAPI4HW"
-API_URL = 'https://api.genius.com/'
+GENIUS_API_TOKEN = 'i4Ob0Fh5qvkxKf6xavbihq3CqBWTtieQC6EBUIEJS2AcAQClOoZ50iQvN0PKHEDa'
+GENIUS_API_URL = 'https://api.genius.com/'
 
-def random_song():
-    search_term = random.choice(
-        [
-            'love',
-            'life',
-            'happy',
-            'sad',
-            'rock',
-            'pop',
-        ]
-    )
-    response = requests.get(
-        f"{API_URL}search",
-        headers={'Authorization': f'Bearer {API_TOKEN}'},
-        params={'q': search_term}
-    )
-    data = response.json()
-    song = random.choice(data['response']['hits'])['result']
-    return {
-        'title': song['title'],
-        'artist': song['primary_artist']['name'],
-        'image_url': song['song_art_image_url']
-    }
-
-
-
+def get_random_song():
+    try:
+        search_terms = ['love', 'life', 'happy', 'sad', 'rock', 'pop', 'dance', 'music']
+        search_term = random.choice(search_terms)
+        
+        headers = {
+            'Authorization': f'Bearer {GENIUS_API_TOKEN}'
+        }
+        
+        params = {
+            'q': search_term,
+            'per_page': 50
+        }
+        
+        response = requests.get(f"{GENIUS_API_URL}/search", headers=headers, params=params)
+        response.raise_for_status()
+        
+        data = response.json()
+        hits = data.get('response', {}).get('hits', [])
+        
+        if not hits:
+            return None
+        
+        song = random.choice(hits)['result']
+        
+        return {
+            'title': song.get('title', 'Unknown Title'),
+            'artist': song.get('primary_artist', {}).get('name', 'Unknown Artist'),
+            'artist_image': song.get('primary_artist', {}).get('image_url', 'https://via.placeholder.com/150x150.png?text=No+Image+Available'),
+            'image_url': song.get('song_art_image_url', 'https://via.placeholder.com/500x500.png?text=No+Image+Available'),
+            'lyrics_url': song.get('url', '#')
+        }
+    except Exception as e:
+        print(f"Error fetching song: {e}")
+        return None
 
 @app.route('/')
 def index():
-    song = random_song()
-    return render_template('index.html', song=song)
+    song = get_random_song()
+    if song:
+        return render_template('index.html', song=song)
+    else:
+        return "<h1>Could not fetch a song at this time. Please try again later.</h1>"
 
-app.run(
-    port=int(os.getenv('PORT', 8080)),
-    host=os.getenv('IP', '0.0.0.0'),
-    debug=True
-)
+if __name__ == '__main__':
+    app.run(debug=True)
