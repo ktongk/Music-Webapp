@@ -1,10 +1,14 @@
 from flask import Flask, render_template
 import requests
 import random
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
-GENIUS_API_TOKEN = 'i4Ob0Fh5qvkxKf6xavbihq3CqBWTtieQC6EBUIEJS2AcAQClOoZ50iQvN0PKHEDa'
+GENIUS_API_TOKEN = os.getenv('GENIUS_API_TOKEN')
 GENIUS_API_URL = 'https://api.genius.com/'
 
 def get_random_song():
