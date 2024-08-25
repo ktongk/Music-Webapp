@@ -11,5 +11,4 @@ my_headers = {
 
 response = requests.get(url, headers=my_headers)
 json_body = response.json()
-#print(json.dumps(json_body, indent=2))
-print(json_body["name"][0]["title"])
+print(json.dumps(json_body, indent=2))
