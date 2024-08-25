@@ -56,4 +56,8 @@ def index():
         return "<h1>Could not fetch a song at this time. Please try again later.</h1>"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(
+        port= int(os.getnv('PORT', 8080)),
+        host= os.getnv('IP', '0.0.0.0'),
+        debug=True
+    )
